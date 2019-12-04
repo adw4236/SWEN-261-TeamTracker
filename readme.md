@@ -18,6 +18,14 @@ Usage: `node count_messages.js -t <access token> [--from <start date>] [--to <en
 
 See setup for retrieving an access token (Step 7).
 
+Dates can be formatted in `mm/dd/yyyy`
+
+The dates are passed directly into JavaScripts Date object.  See
+[this reference](https://www.w3schools.com/js/js_date_formats.asp)
+for more information about formatting.
+
+Example: `node count_messages.js -t xoxp-************-************-************-******************************** --from 11/5/2019 --to 11/25/2019`
+
 ## Setup
 
 This project requires [NodeJS](https://nodejs.org/en/) and NPM to run.
