@@ -49,5 +49,7 @@ team per semester.
     - users:read
     - channels:history
     - channels:read
+	- groups:history
+	- groups:read
 6. At the top of this page, click "Install App to Workspace" and Allow
 7. Record the OAuth Access Token for use in count_messages.js

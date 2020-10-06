@@ -41,10 +41,14 @@ if args.latest:
 
 response = client.users_list()
 for member in response["members"]:
-    users[member["id"]] = member["real_name"]
+    users[member["id"]] = member["profile"]["real_name"]
 
-response = client.conversations_list()
+response = client.conversations_list(types="public_channel,private_channel")
 for channel in response["channels"]:
+
+    # Skip enterprise level shared channels
+    if "is_global_shared" in channel and channel["is_global_shared"]:
+        continue
 
     options = {
         "channel": channel["id"],
@@ -56,8 +60,11 @@ for channel in response["channels"]:
         options["latest"] = latest_time
 
     count = {}
-    response = client.channels_history(**options)
+    response = client.conversations_history(**options)
     for message in response["messages"]:
+        # Skip messages without a user (i.e. bot messages)
+        if "user" not in message:
+            continue
         if message["user"] not in count:
             count[message["user"]] = 0
         count[message["user"]] += 1
