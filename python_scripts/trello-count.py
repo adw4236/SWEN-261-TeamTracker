@@ -13,7 +13,7 @@ pip install requests
 5. The token you are presented is the "token" argument
 6. Run the following command to view a graph
 
-python trello.py -k <key from step 3> -t <token from step 5> -b <name of the board> [-o <start date>] [-l <end date>]
+python trello.py -k <key from step 3> -t <token from step 5> -b <name of the board> [--team <team name>] [-o <start date>] [-l <end date>]
 
 E.g.
 python trello.py -k ******************************** -t **************************************************************** -b "2191-swen-261-06-d-shadow" -o 11/5/2019 -l 11/25/2019
@@ -34,6 +34,7 @@ parser = argparse.ArgumentParser(description="Count the number of messages sent 
 parser.add_argument("--key", "-k", help="The api key from your trello account", required=True)
 parser.add_argument("--token", "-t", help="The access token generated from your trello account", required=True)
 parser.add_argument("--board", "-b", help="The name of the board to show statistics for", required=True)
+parser.add_argument("--team", help="The name of the team that the board exists in")
 parser.add_argument("--oldest", "-o", help="The date of the earliest message to start counting at")
 parser.add_argument("--latest", "-l", help="The date of the latest message to stop counting at")
 parser.add_argument("--increment", "-i", help="The amount of time activity will be grouped in (hours)", default="24")
@@ -48,11 +49,19 @@ if args.latest:
     latest_time = datetime.datetime.strptime(args.latest, args.format)
 time_delta = datetime.timedelta(hours=int(args.increment))
 
-# print(oldest_time + time_delta)
+team = ""
+if args.team:
+    response = requests.get(url="https://api.trello.com/1/members/me", params={"key": args.key, "token": args.token})
+    for organizationId in response.json()["idOrganizations"]:
+        organizaiton = requests.get(url="https://api.trello.com/1/organizations/" + organizationId, params={"key": args.key, "token": args.token})
+        if organizaiton.json()["displayName"] == args.team:
+            team = organizationId
 
 response = requests.get(url="https://api.trello.com/1/members/me/boards", params={"key": args.key, "token": args.token})
 board_id = ""
 for board in response.json():
+    if team and board["idOrganization"] != team:
+        continue
     if board["name"] == args.board:
         board_id = board["id"]
 if not board_id:
